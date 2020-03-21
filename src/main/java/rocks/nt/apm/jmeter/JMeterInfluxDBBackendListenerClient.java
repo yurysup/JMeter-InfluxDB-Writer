@@ -6,8 +6,8 @@ import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterContextService.ThreadCounts;
 import org.apache.jmeter.visualizers.backend.AbstractBackendListenerClient;
 import org.apache.jmeter.visualizers.backend.BackendListenerContext;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
@@ -29,9 +29,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListenerClient implements Runnable {
 	/**
-	 * Logger.
+	 * log.
 	 */
-	private static final Logger LOGGER = LoggingManager.getLoggerForClass();
+	private static final Logger log = LoggerFactory.getLogger(JMeterInfluxDBBackendListenerClient.class);
 
 	/**
 	 * Parameter Keys.
@@ -196,7 +196,7 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 
 	@Override
 	public void teardownTest(BackendListenerContext context) throws Exception {
-		LOGGER.info("Shutting down influxDB scheduler...");
+		log.info("Shutting down influxDB scheduler...");
 		scheduler.shutdown();
 
 		addVirtualUsersMetrics(0, 0, 0, 0, JMeterContextService.getThreadCounts().finishedThreads);
@@ -214,9 +214,9 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 		influxDB.disableBatch();
 		try {
 			scheduler.awaitTermination(30, TimeUnit.SECONDS);
-			LOGGER.info("influxDB scheduler terminated!");
+			log.info("influxDB scheduler terminated!");
 		} catch (InterruptedException e) {
-			LOGGER.error("Error waiting for end of scheduler");
+			log.error("Error waiting for end of scheduler");
 		}
 
 		samplersToFilter.clear();
@@ -231,7 +231,7 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 			ThreadCounts tc = JMeterContextService.getThreadCounts();
 			addVirtualUsersMetrics(getUserMetrics().getMinActiveThreads(), getUserMetrics().getMeanActiveThreads(), getUserMetrics().getMaxActiveThreads(), tc.startedThreads, tc.finishedThreads);
 		} catch (Exception e) {
-			LOGGER.error("Failed writing to influx", e);
+			log.error("Failed writing to influx", e);
 		}
 	}
 
