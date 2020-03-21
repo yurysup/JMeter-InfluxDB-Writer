@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListenerClient implements Runnable {
 	/**
-	 * log.
+	 * Logger.
 	 */
 	private static final Logger log = LoggerFactory.getLogger(JMeterInfluxDBBackendListenerClient.class);
 
@@ -141,7 +141,9 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 						.tag(RequestMeasurement.Tags.RUN_ID, runId)
 						.tag(RequestMeasurement.Tags.TEST_NAME, testName)
 						.addField(RequestMeasurement.Fields.NODE_NAME, nodeName)
-						.addField(RequestMeasurement.Fields.RESPONSE_TIME, sampleResult.getTime());
+						.addField(RequestMeasurement.Fields.RESPONSE_TIME, sampleResult.getTime())
+						.addField(RequestMeasurement.Fields.BYTES_SENT, sampleResult.getSentBytes())
+						.addField(RequestMeasurement.Fields.BYTES_RECEIVED, sampleResult.getBytesAsLong());
 				addOptionalTagsToPoint(pointBuilder, tags);
 				influxDB.write(influxDBConfig.getInfluxDatabase(), influxDBConfig.getInfluxRetentionPolicy(), pointBuilder.build());
 			}
